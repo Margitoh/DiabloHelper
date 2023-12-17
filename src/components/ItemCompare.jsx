@@ -1,10 +1,17 @@
 import { useState } from "react";
 import Tesseract from "tesseract.js";
 
+import { FontAwesomeIcon, Camera } from "../globals/faIcons";
+
 const ItemCompare = () => {
   const [image, setImage] = useState(null);
   const [processing, setProcessing] = useState(false);
   const [ocrResult, setOcrResult] = useState(null);
+  const [parsedText, setParsedText] = useState([null]);
+
+  const addItem = (item) => {
+    setParsedText((currentArray) => [...currentArray, item]);
+  };
 
   const processImage = async (image) => {
     setProcessing(true);
@@ -12,7 +19,7 @@ const ItemCompare = () => {
       const { data } = await Tesseract.recognize(image, "eng");
 
       const lines = data.lines;
-      console.log("Lines:", lines);
+      //console.log("Lines:", lines);
 
       const excludedPatterns = [
         "Item Power",
@@ -40,6 +47,7 @@ const ItemCompare = () => {
       });
 
       setOcrResult(relevantLines);
+      addItem(relevantLines);
     } catch (error) {
       console.error("Error processing image:", error);
     } finally {
@@ -63,6 +71,7 @@ const ItemCompare = () => {
 
   return (
     <div>
+      <FontAwesomeIcon icon={Camera} size={"6x"} color="#fff" />
       <input type="file" onChange={(e) => handleImageUpload(e)} />
       {image && (
         <div>
@@ -73,7 +82,9 @@ const ItemCompare = () => {
             <div>
               <p>OCR Result:</p>
               {ocrResult && ocrResult.length > 0 ? (
-                ocrResult.map((line, index) => <p key={index}>{line.text}</p>)
+                ocrResult.map((parsedText, index) => (
+                  <p key={index}>{parsedText.text}</p>
+                ))
               ) : (
                 <p>No relevant OCR result available</p>
               )}
